@@ -17,10 +17,91 @@ jobs:
       - name: Build da imagem Docker
         run: docker build -t autovitrine-ci:test .
 
-      - name: Smoke Test (/health e /docs)
+name: CI - Teste Completo de Todas as Rotas (AutoVitrine)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  testar-todas-rotas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout do código
+        uses: actions/checkout@v4
+
+      - name: 2. Build da imagem Docker
+        run: docker build -t autovitrine-ci:test .
+
+      - name: 3. Executar suíte completa de testes HTTP (CRUD + JWT + RBAC)
         run: |
           docker run -d -p 3000:3000 --name vitrine-ci autovitrine-ci:test
           sleep 3
-          curl -f http://localhost:3000/health || exit 1
-          curl -f http://localhost:3000/api/v1/111carros || exit 1
+
+          check_status() {
+            local nome="$1"
+            local esperado="$2"
+            local obtido="$3"
+            if [ "$obtido" != "$esperado" ]; then
+              echo "❌ FALHA [$nome]: esperado HTTP $esperado, mas recebeu $obtido"
+              docker logs vitrine-ci
+              exit 1
+            fi
+            echo "✅ PASSOU [$nome] -> HTTP $obtido"
+          }
+
+          # 1. Healthcheck e Documentação OpenAPI
+          check_status "GET /health" "200" "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/health)"
+          check_status "GET /docs/api.json" "200" "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/docs/api.json)"
+
+          # 2. Rotas Públicas de Leitura
+          check_status "GET /api/v1/carros (Listar todos)" "200" "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/v1/carros)"
+          check_status "GET /api/v1/carros/1 (Buscar por ID)" "200" "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/v1/carros/1)"
+
+          # 3. Bloqueio de segurança sem Token (401)
+          check_status "POST /api/v1/carros sem token" "401" "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:3000/api/v1/carros)"
+
+          # 4. Cadastro de novo usuário (POST /auth/register) e Login (POST /auth/login)
+          check_status "POST /api/v1/auth/register" "201" "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:3000/api/v1/auth/register \
+            -H 'Content-Type: application/json' \
+            -d '{"nome":"Teste CI","email":"ci@auto.com","senha":"123456","role":"USER"}')"
+
+          TOKEN_USER=$(curl -s -X POST http://localhost:3000/api/v1/auth/login \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"ci@auto.com","senha":"123456"}' \
+            | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
+
+          TOKEN_ADMIN=$(curl -s -X POST http://localhost:3000/api/v1/auth/login \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"admin@auto.com","senha":"admin123"}' \
+            | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
+
+          # 5. Inserir veículo como USER autenticado (POST /carros -> 201)
+          RES_POST=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/api/v1/carros \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $TOKEN_USER" \
+            -d '{"marca":"Fiat","modelo":"Fastback","ano":2024,"preco":129900}')
+          STATUS_POST=$(echo "$RES_POST" | tail -n1)
+          BODY_POST=$(echo "$RES_POST" | sed '$d')
+          check_status "POST /api/v1/carros (Criar anúncio)" "201" "$STATUS_POST"
+
+          CARRO_ID=$(echo "$BODY_POST" | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
+
+          # 6. Alterar veículo criado (PUT /carros/:id -> 200)
+          check_status "PUT /api/v1/carros/$CARRO_ID (Atualizar)" "200" "$(curl -s -o /dev/null -w '%{http_code}' -X PUT http://localhost:3000/api/v1/carros/$CARRO_ID \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $TOKEN_USER" \
+            -d '{"marca":"Fiat","modelo":"Fastback Abarth","ano":2024,"preco":149900}')"
+
+          # 7. Teste RBAC: USER comum tentando deletar deve falhar (403)
+          check_status "DELETE /api/v1/carros/$CARRO_ID como USER (RBAC)" "403" "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE http://localhost:3000/api/v1/carros/$CARRO_ID \
+            -H "Authorization: Bearer $TOKEN_USER")"
+
+          # 8. Exclusão autorizada como ADMIN (DELETE /carros/:id -> 204)
+          check_status "DELETE /api/v1/carros/$CARRO_ID como ADMIN" "204" "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE http://localhost:3000/api/v1/carros/$CARRO_ID \
+            -H "Authorization: Bearer $TOKEN_ADMIN")"
+
           docker stop vitrine-ci
