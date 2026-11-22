@@ -5,7 +5,7 @@ class AuthController {
     try {
       const usuario = await authService.registrar(req.body);
       return res.status(201).json({
-        mensagem: 'Usuário cadastrado com sucesso.',
+        mensagem: 'Usuário foi cadastrado com sucesso.',
         usuario
       });
     } catch (err) {
