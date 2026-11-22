@@ -22,5 +22,5 @@ jobs:
           docker run -d -p 3000:3000 --name vitrine-ci autovitrine-ci:test
           sleep 3
           curl -f http://localhost:3000/health || exit 1
-          curl -f http://localhost:3000/api/v1/carros || exit 1
+          curl -f http://localhost:3000/api/v1/111carros || exit 1
           docker stop vitrine-ci
