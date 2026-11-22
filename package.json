@@ -1,0 +1,17 @@
+{
+  "name": "auto-vitrine-api",
+  "version": "1.0.0",
+  "description": "API RESTful de Anuncios de Veiculos com Clean Architecture, JWT, RBAC, OpenAPI/Swagger, Docker e CI",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

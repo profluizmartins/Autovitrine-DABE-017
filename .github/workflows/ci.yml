@@ -1,0 +1,26 @@
+name: CI - AutoVitrine API & Docker
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-e-smoke-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Build da imagem Docker
+        run: docker build -t autovitrine-ci:test .
+
+      - name: Smoke Test (/health e /docs)
+        run: |
+          docker run -d -p 3000:3000 --name vitrine-ci autovitrine-ci:test
+          sleep 3
+          curl -f http://localhost:3000/health || exit 1
+          curl -f http://localhost:3000/docs/api.json || exit 1
+          docker stop vitrine-ci

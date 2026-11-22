@@ -1,0 +1,15 @@
+services:
+  api:
+    build: .
+    container_name: autovitrine_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: segredo_jwt_autovitrine_2026
+    volumes:
+      - autovitrine_data:/app/data
+
+volumes:
+  autovitrine_data:

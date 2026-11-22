@@ -1,0 +1,67 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nome": "Administrador Concessionária",
+      "email": "admin@auto.com",
+      "senhaHash": "$2a$10$N/.KY.UKd1bKEzYwFSuD0uO0RX4LQCmHYM2RwR7wSuFt9sh1K0OL6",
+      "role": "ADMIN"
+    },
+    {
+      "id": 2,
+      "nome": "Vendedor Padrão",
+      "email": "vendedor@auto.com",
+      "senhaHash": "$2a$10$PkkwS2e7/xVa/HISlFenXuHxvEHsTpazqBswx97WTj/8H.EuKZKKW",
+      "role": "USER"
+    },
+    {
+      "id": 3,
+      "nome": "Luiz Martins",
+      "email": "luizvend@gmail.com",
+      "senhaHash": "$2a$10$vdCfoK6WvanEBEVlDp3cHe0bInbSi5J3agAI7Dirhnr4UyHQrXZGm",
+      "role": "USER"
+    }
+  ],
+  "carros": [
+    {
+      "id": 1,
+      "marca": "Toyota",
+      "modelo": "Corolla XEi 2.0",
+      "ano": 2023,
+      "preco": 138900,
+      "cor": "Prata",
+      "descricao": "Único dono, revisões em concessionária, baixa quilometragem.",
+      "imagem": "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800&q=80",
+      "vendedorId": 2,
+      "vendedorNome": "Vendedor Padrão",
+      "criadoEm": "2026-11-22T02:04:57.263Z"
+    },
+    {
+      "id": 2,
+      "marca": "Honda",
+      "modelo": "Civic Touring 1.5 Turbo",
+      "ano": 2022,
+      "preco": 152000,
+      "cor": "Preto",
+      "descricao": "Teto solar, painel digital, impecável.",
+      "imagem": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800&q=80",
+      "vendedorId": 1,
+      "vendedorNome": "Administrador Concessionária",
+      "criadoEm": "2026-11-22T02:04:57.264Z"
+    },
+    {
+      "id": 3,
+      "marca": "Wolkswagen",
+      "modelo": "Fusca Itamar",
+      "ano": 1993,
+      "preco": 30000,
+      "cor": "Bege",
+      "descricao": "Carrão para toda obra",
+      "imagem": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800&q=80",
+      "vendedorId": 3,
+      "vendedorNome": "Luiz Martins",
+      "criadoEm": "2026-11-22T02:08:33.286Z",
+      "atualizadoEm": "2026-11-22T02:09:01.666Z"
+    }
+  ]
+}

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoVitrine — Anúncios de Veículos</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { margin: 0; background: #f1f5f9; color: #1e293b; }
+    header { background: #0f172a; color: #fff; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    header h1 { margin: 0; font-size: 1.35rem; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .swagger-link { color: #38bdf8; text-decoration: none; font-size: 0.88rem; font-weight: 600; border: 1px solid #38bdf8; padding: 5px 10px; border-radius: 6px; }
+    .swagger-link:hover { background: #38bdf8; color: #0f172a; }
+    .badge-auth { padding: 6px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; }
+    .off { background: #ef4444; color: #fff; }
+    .on { background: #10b981; color: #fff; }
+    .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
+    .panel { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    h2 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    input, select, textarea { width: 100%; padding: 9px 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+    button { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-success { background: #059669; color: #fff; }
+    .btn-success:hover { background: #047857; }
+    .btn-secondary { background: #64748b; color: #fff; margin-top: 6px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tab-btn { background: #e2e8f0; color: #334155; padding: 6px; }
+    .tab-btn.active { background: #0f172a; color: #fff; }
+    .grid-carros { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+    .car-card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; flex-direction: column; }
+    .car-card img { width: 100%; height: 165px; object-fit: cover; background: #cbd5e1; }
+    .car-body { padding: 14px; flex: 1; display: flex; flex-direction: column; }
+    .car-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px; }
+    .car-price { font-size: 1.2rem; font-weight: 800; color: #059669; margin: 4px 0 8px; }
+    .car-meta { font-size: 0.8rem; color: #64748b; margin-bottom: 8px; }
+    .car-desc { font-size: 0.85rem; color: #475569; flex: 1; margin-bottom: 12px; }
+    .card-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .btn-sm { padding: 6px; font-size: 0.78rem; }
+    .btn-view { background: #0ea5e9; color: #fff; }
+    .btn-edit { background: #f59e0b; color: #fff; }
+    .btn-del { background: #ef4444; color: #fff; }
+    .hint { font-size: 0.76rem; color: #64748b; margin-bottom: 8px; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); align-items: center; justify-content: center; padding: 16px; }
+    .modal-content { background: #fff; max-width: 500px; width: 100%; border-radius: 10px; padding: 20px; }
+    .modal-content img { width: 100%; height: 220px; object-fit: cover; border-radius: 6px; margin-bottom: 12px; }
+    @media (max-width: 820px) { .container { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>AutoVitrine — Classificados de Veículos</h1>
+  <div class="header-right">
+    <a href="/docs" target="_blank" class="swagger-link">Swagger UI (/docs)</a>
+    <span id="statusBadge" class="badge-auth off">Visitante (Sem Token)</span>
+  </div>
+</header>
+
+<div class="container">
+  <div>
+    <div class="panel">
+      <h2>Acesso do Anunciante (JWT + RBAC)</h2>
+      <div class="tabs">
+        <button class="tab-btn active" id="tabLogin" onclick="alternarAba('login')">Entrar</button>
+        <button class="tab-btn" id="tabReg" onclick="alternarAba('register')">Criar Conta</button>
+      </div>
+
+      <div id="formLogin">
+        <div class="hint">Admin: admin@auto.com / admin123<br>Vendedor: vendedor@auto.com / 123456</div>
+        <input type="email" id="loginEmail" value="admin@auto.com" placeholder="E-mail" />
+        <input type="password" id="loginSenha" value="admin123" placeholder="Senha" />
+        <button class="btn-primary" onclick="fazerLogin()">Autenticar e Obter Token</button>
+        <button class="btn-secondary" onclick="fazerLogout()">Sair (Limpar Token)</button>
+      </div>
+
+      <div id="formRegister" style="display:none;">
+        <input type="text" id="regNome" placeholder="Seu Nome" />
+        <input type="email" id="regEmail" placeholder="Seu E-mail" />
+        <input type="password" id="regSenha" placeholder="Crie uma Senha" />
+        <select id="regRole">
+          <option value="USER">Perfil: Vendedor (USER)</option>
+          <option value="ADMIN">Perfil: Administrador (ADMIN)</option>
+        </select>
+        <button class="btn-success" onclick="cadastrarUsuario()">Cadastrar Usuário</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 id="tituloFormCarro">Anunciar Veículo (Autenticado)</h2>
+      <input type="hidden" id="carroId" />
+      <input type="text" id="marca" placeholder="Marca (ex: Volkswagen)" />
+      <input type="text" id="modelo" placeholder="Modelo (ex: Golf GTI)" />
+      <input type="number" id="ano" placeholder="Ano (ex: 2023)" />
+      <input type="number" id="preco" placeholder="Preço em R$ (ex: 145000)" />
+      <input type="text" id="cor" placeholder="Cor (ex: Branco)" />
+      <input type="text" id="imagem" placeholder="URL da Foto (opcional)" />
+      <textarea id="descricao" rows="2" placeholder="Descrição do veículo"></textarea>
+      <button class="btn-success" id="btnSalvarCarro" onclick="salvarCarro()">Publicar Anúncio (POST)</button>
+      <button class="btn-secondary" id="btnCancelarEdicao" style="display:none;" onclick="limparFormCarro()">Cancelar Edição</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel" style="display:flex; justify-content:space-between; align-items:center; gap: 10px;">
+      <h2 style="border:none; margin:0; padding:0;">Veículos Disponíveis</h2>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="filtroMarca" placeholder="Filtrar marca..." style="margin:0; width:160px;" onkeyup="carregarCarros()" />
+        <button class="btn-primary" style="width:auto; padding:8px 14px;" onclick="carregarCarros()">Atualizar</button>
+      </div>
+    </div>
+    <div id="vitrine" class="grid-carros"></div>
+  </div>
+</div>
+
+<div id="modalDetalhes" class="modal" onclick="fecharModal(event)">
+  <div class="modal-content" id="modalBody"></div>
+</div>
+
+<script>
+  const API = '/api/v1';
+
+  function alternarAba(aba) {
+    document.getElementById('formLogin').style.display = aba === 'login' ? 'block' : 'none';
+    document.getElementById('formRegister').style.display = aba === 'register' ? 'block' : 'none';
+    document.getElementById('tabLogin').classList.toggle('active', aba === 'login');
+    document.getElementById('tabReg').classList.toggle('active', aba === 'register');
+  }
+
+  function atualizarBadge() {
+    const token = localStorage.getItem('auto_token');
+    const nome = localStorage.getItem('auto_user');
+    const role = localStorage.getItem('auto_role');
+    const badge = document.getElementById('statusBadge');
+    if (token) {
+      badge.className = 'badge-auth on';
+      badge.textContent = `${nome} [${role}]`;
+    } else {
+      badge.className = 'badge-auth off';
+      badge.textContent = 'Visitante (Sem Token)';
+    }
+  }
+
+  async function cadastrarUsuario() {
+    const nome = document.getElementById('regNome').value;
+    const email = document.getElementById('regEmail').value;
+    const senha = document.getElementById('regSenha').value;
+    const role = document.getElementById('regRole').value;
+
+    const res = await fetch(`${API}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, senha, role })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.mensagem);
+      document.getElementById('loginEmail').value = email;
+      document.getElementById('loginSenha').value = senha;
+      alternarAba('login');
+    } else {
+      alert(`Erro (${res.status}): ${data.erro}`);
+    }
+  }
+
+  async function fazerLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const senha = document.getElementById('loginSenha').value;
+
+    const res = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem('auto_token', data.token);
+      localStorage.setItem('auto_user', data.usuario.nome);
+      localStorage.setItem('auto_role', data.usuario.role);
+      atualizarBadge();
+      alert(`Login realizado! Perfil: ${data.usuario.role}`);
+    } else {
+      alert(`Falha (${res.status}): ${data.erro}`);
+    }
+  }
+
+  function fazerLogout() {
+    localStorage.removeItem('auto_token');
+    localStorage.removeItem('auto_user');
+    localStorage.removeItem('auto_role');
+    atualizarBadge();
+    alert('Token removido.');
+  }
+
+  async function carregarCarros() {
+    const marca = document.getElementById('filtroMarca').value;
+    const url = marca ? `${API}/carros?marca=${encodeURIComponent(marca)}` : `${API}/carros`;
+    const res = await fetch(url);
+    const lista = await res.json();
+    const vitrine = document.getElementById('vitrine');
+    vitrine.innerHTML = '';
+
+    lista.forEach(c => {
+      vitrine.innerHTML += `
+        <div class="car-card">
+          <img src="${c.imagem}" alt="${c.modelo}" />
+          <div class="car-body">
+            <div class="car-title">${c.marca} ${c.modelo}</div>
+            <div class="car-price">R$ ${Number(c.preco).toLocaleString('pt-BR')}</div>
+            <div class="car-meta">Ano: ${c.ano} • Cor: ${c.cor} • Por: ${c.vendedorNome}</div>
+            <div class="car-desc">${c.descricao || 'Sem descrição adicional.'}</div>
+            <div class="card-actions">
+              <button class="btn-sm btn-view" onclick="verDetalhes(${c.id})">Ver</button>
+              <button class="btn-sm btn-edit" onclick="prepararEdicao(${c.id})">Editar</button>
+              <button class="btn-sm btn-del" onclick="deletarCarro(${c.id})">Excluir</button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  async function verDetalhes(id) {
+    const res = await fetch(`${API}/carros/${id}`);
+    const c = await res.json();
+    if (!res.ok) return alert(c.erro);
+
+    document.getElementById('modalBody').innerHTML = `
+      <img src="${c.imagem}" alt="${c.modelo}" />
+      <h2 style="margin-bottom:4px;">${c.marca} ${c.modelo} (${c.ano})</h2>
+      <div class="car-price">R$ ${Number(c.preco).toLocaleString('pt-BR')}</div>
+      <p><strong>Cor:</strong> ${c.cor}<br><strong>Anunciante:</strong> ${c.vendedorNome}</p>
+      <p>${c.descricao || 'Sem descrição.'}</p>
+      <button class="btn-primary" onclick="document.getElementById('modalDetalhes').style.display='none'">Fechar</button>
+    `;
+    document.getElementById('modalDetalhes').style.display = 'flex';
+  }
+
+  function fecharModal(e) {
+    if (e.target.id === 'modalDetalhes') {
+      document.getElementById('modalDetalhes').style.display = 'none';
+    }
+  }
+
+  async function prepararEdicao(id) {
+    const res = await fetch(`${API}/carros/${id}`);
+    const c = await res.json();
+    if (!res.ok) return alert(c.erro);
+
+    document.getElementById('carroId').value = c.id;
+    document.getElementById('marca').value = c.marca;
+    document.getElementById('modelo').value = c.modelo;
+    document.getElementById('ano').value = c.ano;
+    document.getElementById('preco').value = c.preco;
+    document.getElementById('cor').value = c.cor;
+    document.getElementById('imagem').value = c.imagem;
+    document.getElementById('descricao').value = c.descricao;
+
+    document.getElementById('tituloFormCarro').textContent = `Editando Veículo #${c.id}`;
+    document.getElementById('btnSalvarCarro').textContent = 'Salvar Alterações (PUT)';
+    document.getElementById('btnCancelarEdicao').style.display = 'block';
+  }
+
+  function limparFormCarro() {
+    ['carroId', 'marca', 'modelo', 'ano', 'preco', 'cor', 'imagem', 'descricao'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('tituloFormCarro').textContent = 'Anunciar Veículo (Autenticado)';
+    document.getElementById('btnSalvarCarro').textContent = 'Publicar Anúncio (POST)';
+    document.getElementById('btnCancelarEdicao').style.display = 'none';
+  }
+
+  async function salvarCarro() {
+    const id = document.getElementById('carroId').value;
+    const payload = {
+      marca: document.getElementById('marca').value,
+      modelo: document.getElementById('modelo').value,
+      ano: document.getElementById('ano').value,
+      preco: document.getElementById('preco').value,
+      cor: document.getElementById('cor').value,
+      imagem: document.getElementById('imagem').value,
+      descricao: document.getElementById('descricao').value
+    };
+
+    const token = localStorage.getItem('auto_token');
+    const url = id ? `${API}/carros/${id}` : `${API}/carros`;
+    const method = id ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token || ''}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      limparFormCarro();
+      carregarCarros();
+      alert(id ? 'Anúncio atualizado!' : 'Anúncio publicado!');
+    } else {
+      alert(`Bloqueado (${res.status}): ${data.erro}`);
+    }
+  }
+
+  async function deletarCarro(id) {
+    if (!confirm('Deseja realmente excluir este anúncio? (Exige perfil ADMIN)')) return;
+    const token = localStorage.getItem('auto_token');
+
+    const res = await fetch(`${API}/carros/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token || ''}`
+      }
+    });
+
+    if (res.status === 204) {
+      carregarCarros();
+      alert('Anúncio removido!');
+    } else {
+      const data = await res.json();
+      alert(`Bloqueado (${res.status}): ${data.erro}`);
+    }
+  }
+
+  atualizarBadge();
+  carregarCarros();
+</script>
+</body>
+</html>
