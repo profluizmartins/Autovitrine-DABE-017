@@ -1,22 +1,3 @@
-name: CI - AutoVitrine API & Docker
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-jobs:
-  build-e-smoke-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      - name: Build da imagem Docker
-        run: docker build -t autovitrine-ci:test .
-
 name: CI - Teste Completo de Todas as Rotas (AutoVitrine)
 
 on:
