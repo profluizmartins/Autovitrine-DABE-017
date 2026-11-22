@@ -21,7 +21,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/docs/api.json', (req, res) => res.json(swaggerSpec));
 
 // 4. Healthcheck endpoint
-app.get('/health', (req, res) => {
+app.get('/health-quebrado', (req, res) => {
   res.status(200).json({ status: 'UP', service: 'AutoVitrine API', timestamp: new Date().toISOString() });
 });
 
