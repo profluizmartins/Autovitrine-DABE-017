@@ -48,7 +48,7 @@ app.get('/health', async (req, res) => {
 });
 
 // 4. Rotas Versionadas da API
-app.use('/api/v1', apiRoutes);
+app.use('/api/v2', apiRoutes);
 
 // 5. Middleware Global de Tratamento de Erros
 app.use(errorHandler);
