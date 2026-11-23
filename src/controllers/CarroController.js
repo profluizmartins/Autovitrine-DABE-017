@@ -3,6 +3,7 @@ const carroService = require('../services/CarroService');
 class CarroController {
   async listar(req, res, next) {
     try {
+      console.log("passou aui");
       const { marca } = req.query;
       const lista = await carroService.listarTodos(marca);
       return res.status(200).json(lista);
