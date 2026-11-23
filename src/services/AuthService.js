@@ -18,15 +18,16 @@ class AuthService {
       throw { status: 422, mensagem: 'Formato de e-mail inválido. Utilize o padrão usuario@dominio.com.' };
     }
 
-    const existente = usuarioRepository.buscarPorEmail(emailLimpo);
+    const existente = await usuarioRepository.buscarPorEmail(emailLimpo);
     if (existente) {
+      console.log(existente)
       throw { status: 409, mensagem: 'Este e-mail já está cadastrado.' };
     }
 
     const senhaHash = await bcrypt.hash(senha, SALT_ROUNDS);
     const perfilDefinido = role && role.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER';
 
-    const criado = usuarioRepository.criar({
+    const criado = await usuarioRepository.criar({
       nome: nome.trim(),
       email: emailLimpo,
       senhaHash,
@@ -46,7 +47,7 @@ class AuthService {
       throw { status: 400, mensagem: 'E-mail e senha são obrigatórios.' };
     }
 
-    const usuario = usuarioRepository.buscarPorEmail(email.trim());
+    const usuario = await usuarioRepository.buscarPorEmail(email.trim());
     if (!usuario) {
       throw { status: 401, mensagem: 'Credenciais inválidas.' };
     }

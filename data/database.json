@@ -4,22 +4,29 @@
       "id": 1,
       "nome": "Administrador Concessionária",
       "email": "admin@auto.com",
-      "senhaHash": "$2a$10$N/.KY.UKd1bKEzYwFSuD0uO0RX4LQCmHYM2RwR7wSuFt9sh1K0OL6",
+      "senhaHash": "$2a$10$3qVJa1SXrYtqlnSQls1KRurwb6DeZuVTgcCQOuwAz.gg89CiYG3dS",
       "role": "ADMIN"
     },
     {
       "id": 2,
       "nome": "Vendedor Padrão",
       "email": "vendedor@auto.com",
-      "senhaHash": "$2a$10$PkkwS2e7/xVa/HISlFenXuHxvEHsTpazqBswx97WTj/8H.EuKZKKW",
+      "senhaHash": "$2a$10$d1H2Bmc/8kds0IttxJe5ZuxBVTDWUrrvJjYqmD9xfD1hldlQQH/XO",
       "role": "USER"
     },
     {
       "id": 3,
-      "nome": "Luiz Martins",
-      "email": "luizvend@gmail.com",
-      "senhaHash": "$2a$10$vdCfoK6WvanEBEVlDp3cHe0bInbSi5J3agAI7Dirhnr4UyHQrXZGm",
-      "role": "USER"
+      "nome": "Luiz Admin",
+      "email": "luizadmin@gmail.com",
+      "senhaHash": "$2a$10$mj9QMhgQhXmuwOfzsec78eDGrxdRjXRXI/Z3ZTU284.1ZQ9CO9Mgu",
+      "role": "ADMIN"
+    },
+    {
+      "id": 4,
+      "nome": "Luiz user",
+      "email": "luizuser@gmail.com",
+      "senhaHash": "$2a$10$L.8i3DqzPjEOJFqpKIPgTe3xuT9whFTmenFsUygTkcWShpUac4m8O",
+      "role": "ADMIN"
     }
   ],
   "carros": [
@@ -34,7 +41,7 @@
       "imagem": "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800&q=80",
       "vendedorId": 2,
       "vendedorNome": "Vendedor Padrão",
-      "criadoEm": "2026-11-22T02:04:57.263Z"
+      "criadoEm": "2026-11-23T00:35:31.030Z"
     },
     {
       "id": 2,
@@ -47,21 +54,20 @@
       "imagem": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=800&q=80",
       "vendedorId": 1,
       "vendedorNome": "Administrador Concessionária",
-      "criadoEm": "2026-11-22T02:04:57.264Z"
+      "criadoEm": "2026-11-23T00:35:31.030Z"
     },
     {
       "id": 3,
-      "marca": "Wolkswagen",
-      "modelo": "Fusca Itamar",
-      "ano": 1993,
-      "preco": 30000,
-      "cor": "Bege",
-      "descricao": "Carrão para toda obra",
-      "imagem": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800&q=80",
-      "vendedorId": 3,
-      "vendedorNome": "Luiz Martins",
-      "criadoEm": "2026-11-22T02:08:33.286Z",
-      "atualizadoEm": "2026-11-22T02:09:01.666Z"
+      "marca": "Geely",
+      "modelo": "EX2",
+      "ano": 2026,
+      "preco": 120000,
+      "cor": "Cinza",
+      "descricao": "Carro elétrico Geely EX2",
+      "imagem": "https://motorshow.com.br/wp-content/uploads/sites/2/2025/11/img-20251106-1222052-scaled-1.jpg",
+      "vendedorId": 4,
+      "vendedorNome": "Luiz user",
+      "criadoEm": "2026-11-23T01:11:49.445Z"
     }
   ]
 }

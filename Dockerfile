@@ -1,7 +1,11 @@
 FROM node:20-alpine
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install --omit=dev
+
 COPY . .
+RUN DATABASE_URL="postgresql://postgres:secret_password@localhost:5432/autovitrine_db" npx prisma generate
+
 EXPOSE 3000
 CMD ["node", "src/server.js"]

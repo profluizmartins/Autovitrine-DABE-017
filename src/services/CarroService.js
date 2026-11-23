@@ -16,7 +16,7 @@ class CarroService {
     return carro;
   }
 
-  criar(dados, usuarioLogado) {
+  async criar(dados, usuarioLogado) {
     const { marca, modelo, ano, preco, cor, descricao, imagem } = dados;
 
     if (!marca || !marca.trim() || !modelo || !modelo.trim() || !ano || !preco) {
@@ -27,7 +27,7 @@ class CarroService {
       throw { status: 422, mensagem: 'Ano ou preço inválido.' };
     }
 
-    return repository.criar({
+    return await repository.criar({
       marca: marca.trim(),
       modelo: modelo.trim(),
       ano: Number(ano),
@@ -37,16 +37,17 @@ class CarroService {
       imagem: imagem && imagem.trim()
         ? imagem.trim()
         : 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800&q=80',
-      vendedorId: usuarioLogado.sub,
-      vendedorNome: usuarioLogado.nome
+      vendedorId: Number(usuarioLogado.sub)
     });
   }
 
-  atualizar(id, dados, usuarioLogado) {
-    const carroExistente = this.buscarPorId(id);
+  async atualizar(id, dados, usuarioLogado) {
+    const carroExistente = await this.buscarPorId(id);
 
-    // Regra de negócio: apenas ADMIN ou o próprio anunciante criador pode editar
-    if (usuarioLogado.role !== 'ADMIN' && carroExistente.vendedorId !== usuarioLogado.sub) {
+    const ehAdmin = usuarioLogado.role === 'ADMIN';
+    const ehDono = Number(carroExistente.vendedorId) === Number(usuarioLogado.sub);
+
+    if (!ehAdmin && !ehDono) {
       throw { status: 403, mensagem: 'Acesso proibido: você só pode editar seus próprios anúncios.' };
     }
 
@@ -55,7 +56,7 @@ class CarroService {
       throw { status: 422, mensagem: 'Campos obrigatórios: marca, modelo, ano e preco.' };
     }
 
-    return repository.atualizar(id, {
+    return await repository.atualizar(id, {
       marca: marca.trim(),
       modelo: modelo.trim(),
       ano: Number(ano),

@@ -199,6 +199,10 @@
     const res = await fetch(url);
     const lista = await res.json();
     const vitrine = document.getElementById('vitrine');
+    if (!res.ok || !Array.isArray(lista)) {
+      vitrine.innerHTML = `<p style="color:#ef4444;">Erro ao carregar veículos: ${lista.erro || 'Resposta inválida do servidor.'}</p>`;
+      return;
+    }
     vitrine.innerHTML = '';
 
     lista.forEach(c => {

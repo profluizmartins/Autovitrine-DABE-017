@@ -6,33 +6,68 @@ const swaggerSpec = require('./docs/swagger');
 const apiRoutes = require('./routes/apiRoutes');
 const errorHandler = require('./middlewares/errorMiddleware');
 
+const provider = (process.env.DB_PROVIDER || 'json').toLowerCase();
+const { prisma, inicializarBanco } = require('./config/database');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 1. CORS e JSON Body Parser
+// 1. Middlewares globais
 app.use(cors());
 app.use(express.json());
-
-// 2. Front-End estático
 app.use(express.static(path.join(__dirname, '../public')));
 
-// 3. Documentação Interativa OpenAPI / Swagger UI
+// 2. Documentação OpenAPI / Swagger UI
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/docs/api.json', (req, res) => res.json(swaggerSpec));
 
-// 4. Healthcheck endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'UP', service: 'AutoVitrine API', timestamp: new Date().toISOString() });
+// 3. Healthcheck dinâmico (JSON ou PostgreSQL)
+app.get('/health', async (req, res) => {
+  if (provider === 'postgres') {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      return res.status(200).json({
+        status: 'UP',
+        storage: 'POSTGRESQL (Prisma ORM)',
+        timestamp: new Date().toISOString()
+      });
+    } catch (err) {
+      return res.status(503).json({
+        status: 'DOWN',
+        storage: 'POSTGRESQL',
+        erro: err.message
+      });
+    }
+  }
+
+  return res.status(200).json({
+    status: 'UP',
+    storage: 'JSON_FILE (data/database.json)',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// 5. Rotas Versionadas da API (/api/v1)
+// 4. Rotas Versionadas da API
 app.use('/api/v1', apiRoutes);
 
-// 6. Middleware Global de Tratamento de Erros
+// 5. Middleware Global de Tratamento de Erros
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Front-End:  http://localhost:${PORT}`);
-  console.log(`Swagger UI: http://localhost:${PORT}/docs`);
-  console.log(`OpenAPI:    http://localhost:${PORT}/docs/api.json`);
+// 6. Inicialização do Servidor
+async function bootstrap() {
+  if (provider === 'postgres') {
+    await inicializarBanco();
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Persistência ativa: ${provider.toUpperCase()}`);
+    console.log(`Front-End:          http://localhost:${PORT}`);
+    console.log(`Swagger UI:         http://localhost:${PORT}/docs`);
+    console.log(`Health Check:       http://localhost:${PORT}/health`);
+  });
+}
+
+bootstrap().catch(err => {
+  console.error('Falha crítica ao iniciar o servidor:', err);
+  process.exit(1);
 });

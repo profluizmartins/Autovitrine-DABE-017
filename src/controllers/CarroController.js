@@ -1,46 +1,46 @@
 const carroService = require('../services/CarroService');
 
 class CarroController {
-  listar(req, res, next) {
+  async listar(req, res, next) {
     try {
       const { marca } = req.query;
-      const lista = carroService.listarTodos(marca);
+      const lista = await carroService.listarTodos(marca);
       return res.status(200).json(lista);
     } catch (err) {
       next(err);
     }
   }
 
-  buscarUm(req, res, next) {
+  async buscarUm(req, res, next) {
     try {
-      const carro = carroService.buscarPorId(req.params.id);
+      const carro = await carroService.buscarPorId(req.params.id);
       return res.status(200).json(carro);
     } catch (err) {
       next(err);
     }
   }
 
-  criar(req, res, next) {
+  async criar(req, res, next) {
     try {
-      const criado = carroService.criar(req.body, req.usuario);
+      const criado = await carroService.criar(req.body, req.usuario);
       return res.status(201).json(criado);
     } catch (err) {
       next(err);
     }
   }
 
-  atualizar(req, res, next) {
+  async atualizar(req, res, next) {
     try {
-      const atualizado = carroService.atualizar(req.params.id, req.body, req.usuario);
+      const atualizado = await carroService.atualizar(req.params.id, req.body, req.usuario);
       return res.status(200).json(atualizado);
     } catch (err) {
       next(err);
     }
   }
 
-  deletar(req, res, next) {
+  async deletar(req, res, next) {
     try {
-      carroService.remover(req.params.id);
+      await carroService.remover(req.params.id);
       return res.status(204).send();
     } catch (err) {
       next(err);
